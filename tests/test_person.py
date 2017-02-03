@@ -264,8 +264,8 @@ class TestPersons(TestCase):
 ''') as fname:
             popolo = Popolo.from_filename(fname)
             person = popolo.persons.first
-            assert person.birth_date is None
-            assert person.death_date is None
+            assert person.birth_date == ApproxDate.PAST
+            assert person.death_date == ApproxDate.FUTURE
 
     def test_full_birth_and_death_dates(self):
         with example_file(b'''
