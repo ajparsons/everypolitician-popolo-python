@@ -295,6 +295,13 @@ class PopoloObject(six.with_metaclass(PopoloMeta,object)):
         return first(self.contact_detail_values(contact_type))
 
     def absorb(self,other):
+        """
+        other is about to be discarded for it's (hopefully) better
+        equiv self.
+        
+        Override if there's anything you want to salvage from other
+        and pass into self. 
+        """
         pass
 
     @property
@@ -310,6 +317,30 @@ class PopoloObject(six.with_metaclass(PopoloMeta,object)):
         if isinstance(other, self.__class__):
             return self.id != other.id
         return NotImplemented
+
+    def __lt__(self,other):
+        """
+        is this less "full" than the other?
+        Based entirely on how much info is in there - len of dict.
+        """
+        if self.__class__ == other.__class__:
+            ours = len(self.json)
+            theirs = len(other.json)
+            return ours < theirs
+        else:
+            return NotImplemented
+        
+    def __gt__(self,other):
+        """
+        is this more "full" than the other?
+        Based entirely on how much info is in there - len of dict.
+        """        
+        if self.__class__ == other.__class__:
+            ours = len(self.json)
+            theirs = len(other.json)
+            return ours > theirs
+        else:
+            return NotImplemented
 
     def __hash__(self):
         return hash(self.key_for_hash)

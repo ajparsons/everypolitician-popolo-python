@@ -122,6 +122,16 @@ class Person(PopoloObject):
             msg = "Multiple names for {0} found at date {1}"
             raise Exception(msg.format(self, particular_date))
         return names_at_date[0]['name']
+    
+    def absorb(self,other):
+        """
+        makes sure the final version has picked up any alternate spellings
+        """
+        our_names = [x["name"] for x in self.other_names]
+    
+        for n in other.other_names:
+            if n["name"] not in our_names:
+                self.other_names.append(n)
 
 class Organization(PopoloObject):
     

@@ -5,6 +5,7 @@ import json
 import requests
 import io
 import six
+from copy import deepcopy
 
 from .collections import (PopoloCollection,
     AreaCollection, EventCollection, MembershipCollection, PersonCollection,
@@ -95,3 +96,50 @@ class Popolo(object):
     def to_json(self):
         di = {k:v.raw_data() for k,v in self.collections}
         return json.dumps(di,indent=4, sort_keys=True , ensure_ascii=False)      
+
+    def amend_ids(self,id_list):
+        """
+        expects a list of id replacements
+        [[a,1],[b,2]].
+        Will replace the 'old' id across all objects.
+        When two popolos are being merged, one set of ids needs to take
+        priority. 
+        """
+        for k,v in self.collections:
+            for old,new in id_list:
+                if old != new:
+                    for o in v.object_list:
+                        for prop in o.__class__.__dict__.iterkeys():
+                            if "_id" in prop:
+                                if getattr(o,prop) == old:
+                                    setattr(o,prop,new)
+                                    
+    def merge(self,other):
+        """
+        combine with another popolo, preserving specified id field
+        """
+        #we need to make copies 
+        safe_ours = deepcopy(self)
+        safe_other = deepcopy(other)
+        new = self.__class__()
+        
+        process_order = [
+                        ("organizations","name"),#unique on name
+                        ("events","id"), #unique on id
+                        ("persons","name"),
+                        ("areas","name"),
+                        ("posts","id"),
+                        ("memberships","id"),
+                        ]
+    
+        for p,merge_value in process_order:
+
+            our_col = getattr(safe_ours,p)
+            their_col = getattr(safe_other,p)
+            new_col = getattr(new,p)
+            
+            ids_to_change = our_col.merge(their_col,new_col,merge_value)
+            safe_ours.amend_ids(ids_to_change)
+            safe_other.amend_ids(ids_to_change)
+            
+        return new
