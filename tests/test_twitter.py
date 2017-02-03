@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from unittest import TestCase
 
-from popolo_data.base import extract_twitter_username
+from popolo_data.models import extract_twitter_username
 
 
 class TestNormalizingTwitterUsernames(TestCase):

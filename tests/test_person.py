@@ -7,9 +7,9 @@ import pytest
 import six
 
 from .helpers import example_file
-
+from approx_dates.models import ApproxDate
 from popolo_data.importer import Popolo
-from popolo_data.base import Person
+from popolo_data.models import Person
 
 
 EXAMPLE_TWO_PEOPLE = b'''
