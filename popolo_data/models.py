@@ -74,7 +74,20 @@ class Person(PopoloObject):
         if username_or_url:
             return extract_twitter_username(username_or_url)
         return None
-
+    
+    @twitter.setter
+    def twitter(self,value):
+        """
+        set new twitter - clears other possible method out
+        """
+        if "twitter.com" in value:
+            username = extract_twitter_username(value)
+            self.set_link_values("twitter",value)
+            self.set_contact_detail_values("twitter", username)
+        else:
+            self.del_link_values("twitter")
+            self.set_contact_detail_values("twitter", value)
+            
     @safe_property
     def twitter_all(self):
         # The Twitter screen names in contact_details and links will
