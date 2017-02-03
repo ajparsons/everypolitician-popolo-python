@@ -1,11 +1,15 @@
-import json
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
+import json
 import requests
 
-from .base import (
+from .collections import (
     AreaCollection, EventCollection, MembershipCollection, PersonCollection,
     OrganizationCollection, PostCollection)
 
+class NotAValidType(TypeError):
+    pass
 
 class Popolo(object):
 
@@ -19,35 +23,22 @@ class Popolo(object):
         r = requests.get(url)
         return cls(r.json())
 
-    def __init__(self, json_data):
+    @classmethod
+    def new(cls):
+        return cls({})
+
+    def __init__(self, json_data=None):
+        if json_data == None:
+            json_data = {}
         self.json_data = json_data
-
-    @property
-    def persons(self):
-        return PersonCollection(self.json_data.get('persons', []), self)
-
-    @property
-    def organizations(self):
-        return OrganizationCollection(
-            self.json_data.get('organizations', []), self)
-
-    @property
-    def memberships(self):
-        return MembershipCollection(
-            self.json_data.get('memberships', []), self)
-
-    @property
-    def areas(self):
-        return AreaCollection(self.json_data.get('areas', []), self)
-
-    @property
-    def posts(self):
-        return PostCollection(self.json_data.get('posts', []), self)
-
-    @property
-    def events(self):
-        return EventCollection(self.json_data.get('events', []), self)
-
+        json_get = self.json_data.get
+        self.persons = PersonCollection(json_get('persons', []), self)
+        self.organizations = OrganizationCollection(json_get('organizations', []), self)
+        self.memberships =  MembershipCollection(json_get('memberships', []), self)
+        self.areas = AreaCollection(json_get('areas', []), self)
+        self.posts = PostCollection(json_get('posts', []), self)
+        self.events = EventCollection(json_get('events', []), self)
+   
     @property
     def elections(self):
         return self.events.elections
