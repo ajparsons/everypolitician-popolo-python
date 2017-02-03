@@ -8,9 +8,11 @@ from .base import first
 
 class PopoloCollection(object):
 
-    def __init__(self, data_list, object_class, all_popolo):
+    object_class = None
+
+    def __init__(self, data_list , all_popolo):
         self.all_popolo = all_popolo
-        self.object_class = object_class
+        self.object_class = self.__class__.object_class
         self.object_list = \
             [self.object_class(data, all_popolo) for data in data_list]
         self.lookup_from_key = {}
@@ -49,46 +51,23 @@ class PopoloCollection(object):
 
 
 class PersonCollection(PopoloCollection):
-
-    def __init__(self, persons_data, all_popolo):
-        super(PersonCollection, self).__init__(
-            persons_data, Person, all_popolo)
-
+    object_class = Person
 
 class OrganizationCollection(PopoloCollection):
-
-    def __init__(self, organizations_data, all_popolo):
-        super(OrganizationCollection, self).__init__(
-            organizations_data, Organization, all_popolo)
-
+    object_class = Organization
 
 class MembershipCollection(PopoloCollection):
-
-    def __init__(self, memberships_data, all_popolo):
-        super(MembershipCollection, self).__init__(
-            memberships_data, Membership, all_popolo)
-
+    object_class = Membership
 
 class AreaCollection(PopoloCollection):
-
-    def __init__(self, areas_data, all_popolo):
-        super(AreaCollection, self).__init__(
-            areas_data, Area, all_popolo)
-
+    object_class = Area
 
 class PostCollection(PopoloCollection):
-
-    def __init__(self, posts_data, all_popolo):
-        super(PostCollection, self).__init__(
-            posts_data, Post, all_popolo)
-
+    object_class = Post
 
 class EventCollection(PopoloCollection):
-
-    def __init__(self, events_data, all_popolo):
-        super(EventCollection, self).__init__(
-            events_data, Event, all_popolo)
-
+    object_class = Event
+    
     @property
     def elections(self):
         elections_list = self.filter(classification='general election')
