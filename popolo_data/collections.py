@@ -2,6 +2,7 @@
 Classes to define the different Popolo collections
 
 """
+import json
 
 from .models import Person, Organization, Membership, Area, Post, Event
 from .base import first
@@ -21,6 +22,12 @@ class PopoloCollection(object):
 
     def __len__(self):
         return len(self.object_list)
+
+    def json(self):
+        return json.dumps(self.raw_data())
+
+    def raw_data(self):
+        return [x.data for x in self.object_list]
 
     def __getitem__(self, index):
         return self.object_list[index]

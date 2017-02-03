@@ -3,8 +3,10 @@
 
 import json
 import requests
+import io
+import six
 
-from .collections import (
+from .collections import (PopoloCollection,
     AreaCollection, EventCollection, MembershipCollection, PersonCollection,
     OrganizationCollection, PostCollection)
 
@@ -57,5 +59,39 @@ class Popolo(object):
         return max(lps, key=lambda lp: lp.start_date.midpoint_date)
 
     @property
+    def collections(self):
+        return [[k,v] for k,v in six.iteritems(self.__dict__)\
+                if isinstance(v,PopoloCollection)]
+
+    @property
     def latest_term(self):
         return self.latest_legislative_period
+
+    def add(self,new):
+        """
+        find the correct collection for the object and add it
+        """
+        if isinstance(new,list):
+            ll = new
+        else:
+            ll = [new]
+        
+        to_return = []
+        for l in ll:
+            for k,collection in self.collections:
+                if isinstance(l,collection.object_class):
+                    to_return.append(collection.add(l))
+                    break
+        
+        if len(to_return) != len(ll):
+            raise NotAValidType("This type can't be used with Popolo.")
+
+    def to_filename(self,filename):
+        di = {k:v.raw_data() for k,v in self.collections}
+        content = json.dumps(di,indent=4, sort_keys=True, ensure_ascii=False)
+        with io.open(filename, 'w', encoding='utf8') as json_file:
+            json_file.write(content)
+
+    def to_json(self):
+        di = {k:v.raw_data() for k,v in self.collections}
+        return json.dumps(di,indent=4, sort_keys=True , ensure_ascii=False)      
