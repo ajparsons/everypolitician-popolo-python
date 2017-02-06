@@ -119,6 +119,10 @@ class DateAttribute(Attribute):
     def __set__(self,obj,value):
         if isinstance(value,ApproxDate):
             obj.data[self.attr] = value.isoformat()
+        elif isinstance(value,datetime):
+            obj.data[self.attr] = value.date().isoformat()
+        elif isinstance(value,date):
+            obj.data[self.attr] = value.isoformat()
         else:
             obj.data[self.attr] = value
 
