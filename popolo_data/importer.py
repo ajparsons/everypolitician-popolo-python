@@ -31,10 +31,10 @@ class Popolo(object):
         return cls({})
 
     def __init__(self, json_data=None):
-        if json_data == None:
+        if json_data == None: #insulate from other instances
             json_data = {}
-        self.json_data = json_data
-        json_get = self.json_data.get
+        json_data = deepcopy(json_data)
+        json_get = json_data.get
         self.persons = PersonCollection(json_get('persons', []), self)
         self.organizations = OrganizationCollection(json_get('organizations', []), self)
         self.memberships =  MembershipCollection(json_get('memberships', []), self)
@@ -93,9 +93,16 @@ class Popolo(object):
         with io.open(filename, 'w', encoding='utf8') as json_file:
             json_file.write(content)
 
+    @property
+    def json_data(self):
+        return {k:v.raw_data() for k,v in self.collections}
+
     def to_json(self):
-        di = {k:v.raw_data() for k,v in self.collections}
-        return json.dumps(di,indent=4, sort_keys=True , ensure_ascii=False)      
+        return json.dumps(self.json_data,
+                          indent=4,
+                          sort_keys=True
+                          ,
+                          ensure_ascii=False)      
 
     def amend_ids(self,id_list):
         """
@@ -118,10 +125,11 @@ class Popolo(object):
         """
         combine with another popolo, preserving specified id field
         """
-        #we need to make copies 
-        safe_ours = deepcopy(self)
-        safe_other = deepcopy(other)
-        new = self.__class__()
+        #we need to make copies
+        
+        safe_ours = self.__class__(self.json_data)
+        safe_other = self.__class__(other.json_data)
+        new = self.__class__({})
         
         process_order = [
                         ("organizations","name"),#unique on name
