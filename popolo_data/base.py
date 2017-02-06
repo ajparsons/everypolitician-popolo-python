@@ -1,8 +1,10 @@
 
-from datetime import date
+from datetime import date, datetime
 from approx_dates.models import ApproxDate
 import six
 import json
+from copy import deepcopy
+
 
 def first(l):
     '''Return the first item of a list, or None if it's empty'''
@@ -32,15 +34,36 @@ class Attribute(object):
     '''
     def __init__(self,attr="",default=None,null=False,allow_multiple=False):
         self.attr = attr
-        self.default_value = default
+        self._default_value = default
         self.allow_null_default = null
         self.allow_multiple = allow_multiple
 
+    @property
+    def default_value(self):
+        """
+        safe guard against default being shared between instances
+        """
+        return deepcopy(self._default_value)
+    
     def __get__(self, obj, type=None):
-        if self.allow_null_default == False and self.default_value == None:
+        
+        """
+        fix for approxdate not handling comparisons against null
+        """
+        if isinstance(self.default_value,ApproxDate):
+            default_none = False
+        else:
+            default_none = self.default_value == None
+        
+        if self.allow_null_default == False and default_none:
             return obj.data.get(self.attr)
         else:
-            return obj.data.get(self.attr,self.default_value)
+            try:
+                result = obj.data[self.attr]
+            except KeyError:
+                result = self.default_value
+                obj.data[self.attr] = result
+            return result
 
     def __set__(self,obj,value):
         if isinstance(value,str):
@@ -57,7 +80,7 @@ class RelatedAttribute(Attribute):
     def __init__(self,attr="",default=None,null=False,
                  id_attr=None,collection=None):
         self.attr = attr
-        self.default_value = default
+        self._default_value = default
         self.allow_null_default = null
         self._id_attr = id_attr
         self._collection = collection
