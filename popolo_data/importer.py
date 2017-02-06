@@ -116,7 +116,7 @@ class Popolo(object):
             for old,new in id_list:
                 if old != new:
                     for o in v.object_list:
-                        for prop in o.__class__.__dict__.iterkeys():
+                        for prop in six.iterkeys(o.__class__.__dict__):
                             if "_id" in prop:
                                 if getattr(o,prop) == old:
                                     setattr(o,prop,new)

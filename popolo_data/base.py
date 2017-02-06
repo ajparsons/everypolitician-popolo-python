@@ -92,7 +92,7 @@ class Attribute(object):
             return result
 
     def __set__(self,obj,value):
-        if isinstance(value,str):
+        if six.PY2 and isinstance(value,str):
             nv = unicode(value)
         else:
             nv = value

@@ -24,7 +24,7 @@ class TestSaving(TestCase):
         assert approx_date_to_iso(p.birth_date) == "2015-06"
         p.birth_date = "2015-06-23 to 2015-07-12"
         assert approx_date_to_iso(p.birth_date) == "2015-06-23 to 2015-07-12"
-        p.birth_date = datetime(2015,06,23)
+        p.birth_date = datetime(2015,6,23)
         assert approx_date_to_iso(p.birth_date) == "2015-06-23"        
         
     

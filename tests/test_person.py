@@ -91,17 +91,16 @@ class TestPersons(TestCase):
             assert person_harry > person_norma
             assert not (person_norma  > person_harry)
             
-            #test cross-class comparison fails
-            try:
-                person_norma > "harry"
-            except NotImplemented:
-                pass
-
-            try:
-                person_norma < "harry"
-            except NotImplemented:
-                pass            
-                            
+            #test cross-class comparison default to other side
+            if six.PY2:
+                assert (person_norma > None) == True
+                assert (person_norma < None) == False
+            else:
+                try:
+                    (person_norma > None)
+                except TypeError:
+                    pass
+         
 
     def test_first_from_empty_file_returns_none(self):
         with example_file(b'{}') as filename:
