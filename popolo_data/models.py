@@ -80,7 +80,7 @@ class Person(PopoloObject):
         """
         set new twitter - clears other possible method out
         """
-        if "twitter.com" in value:
+        if value and "twitter.com" in value:
             username = extract_twitter_username(value)
             self.set_link_values("twitter",value)
             self.set_contact_detail_values("twitter", username)

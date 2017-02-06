@@ -311,12 +311,15 @@ class PopoloObject(six.with_metaclass(PopoloMeta,object)):
             'contact_details', 'type', contact_type, 'value')
 
     def del_contact_detail_values(self, contact_type):
-        return self.del_contact_detail_values(
+        return self.del_related_values(
             'contact_details', 'type', contact_type)
     
     def set_contact_detail_values(self, contact_type,new_value):
-        return self.set_related_values(
-            'contact_details', 'type', contact_type, 'value',new_value)
+        if not new_value:
+            return self.del_contact_detail_values(contact_type)
+        else:
+            return self.set_related_values(
+                'contact_details', 'type', contact_type, 'value',new_value)
 
     def contact_detail_value(self, contact_type):
         return first(self.contact_detail_values(contact_type))
