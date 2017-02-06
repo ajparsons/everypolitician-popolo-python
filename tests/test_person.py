@@ -30,6 +30,24 @@ EXAMPLE_TWO_PEOPLE = b'''
 '''
 
 
+EXAMPLE_TWO_PEOPLE_DIFF_SIZE = b'''
+{
+    "persons": [
+        {
+             "id": "1",
+             "name": "Norma Jennings",
+             "national_identity": "American"
+        },
+        {
+             "id": "2",
+             "name": "Harry Truman",
+             "national_identity": "American",
+             "other_names":{"name":"Harry S. Truman"}
+        }
+    ]
+}
+'''
+
 class TestPersons(TestCase):
 
     def test_empty_file_gives_no_people(self):
@@ -63,6 +81,27 @@ class TestPersons(TestCase):
             assert person_harry == person_harry
             assert not (person_norma_a == person_harry)
             assert person_norma_a != person_harry
+
+    def test_persion_greater_than_lesser_than(self):
+        with example_file(EXAMPLE_TWO_PEOPLE_DIFF_SIZE) as fname:
+            person_norma = Popolo.from_filename(fname).persons[0]
+            person_harry = Popolo.from_filename(fname).persons[1]
+            assert person_norma < person_harry
+            assert not (person_harry < person_norma)
+            assert person_harry > person_norma
+            assert not (person_norma  > person_harry)
+            
+            #test cross-class comparison fails
+            try:
+                person_norma > "harry"
+            except NotImplemented:
+                pass
+
+            try:
+                person_norma < "harry"
+            except NotImplemented:
+                pass            
+                            
 
     def test_first_from_empty_file_returns_none(self):
         with example_file(b'{}') as filename:
