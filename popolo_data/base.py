@@ -1,9 +1,44 @@
 
 from datetime import date, datetime
 from approx_dates.models import ApproxDate
+import calendar
 import six
 import json
 from copy import deepcopy
+
+def approx_date_to_iso(approx_date):
+    #duplicated here until approx_date package updated
+    
+    if approx_date.earliest_date == approx_date.latest_date:
+        return approx_date.earliest_date.isoformat()
+    else:
+        #is it a vague month?
+        ed = approx_date.earliest_date
+        ld = approx_date.latest_date
+        if ed.month == ld.month and ed.year == ld.year:
+            days_in_month = calendar.monthrange(ed.year, ed.month)[1]
+            if ed.day == 1 and ld.day == days_in_month:
+                return ed.strftime("%Y-%m")
+        #is it a vague year
+        if ed.year == ld.year:
+            if ed.month == 1 and ed.day == 1:
+                if ld.month == 12 and ld.day == 31:
+                    return "{0}".format(ed.year)
+
+    return "{0} to {1}".format(ed.isoformat(),ld.isoformat())
+
+def approx_date_getter(iso8601_date_string):
+    #duplicated here until approx_date package updated
+        if " to " in iso8601_date_string: #extract double date
+            start,end = iso8601_date_string.split(" to ")
+            start_date = ApproxDate.from_iso8601(start)
+            end_date = ApproxDate.from_iso8601(end)
+            combined = ApproxDate(start_date.earliest_date,
+                                  end_date.latest_date,
+                                  iso8601_date_string)
+            return combined
+        else:
+            return ApproxDate.from_iso8601(iso8601_date_string)  
 
 
 def first(l):
@@ -46,16 +81,7 @@ class Attribute(object):
         return deepcopy(self._default_value)
     
     def __get__(self, obj, type=None):
-        
-        """
-        fix for approxdate not handling comparisons against null
-        """
-        if isinstance(self.default_value,ApproxDate):
-            default_none = False
-        else:
-            default_none = self.default_value == None
-        
-        if self.allow_null_default == False and default_none:
+        if self.allow_null_default == False and self.default_value == None:
             return obj.data.get(self.attr)
         else:
             try:
@@ -107,14 +133,11 @@ class DateAttribute(Attribute):
     Interacts with ApproxDates - sets iso, retrieves ApproxDate
     """
     def __get__(self, obj, type=None):
-        if self.allow_null_default:
-            return obj.get_date(self.attr,None)
-        else:
             return obj.get_date(self.attr,self.default_value)
     
     def __set__(self,obj,value):
         if isinstance(value,ApproxDate):
-            obj.data[self.attr] = value.isoformat()
+            obj.data[self.attr] = approx_date_to_iso(value)
         elif isinstance(value,datetime):
             obj.data[self.attr] = value.date().isoformat()
         elif isinstance(value,date):
@@ -137,15 +160,13 @@ class IdentiferAttribute(Attribute):
                 return v
             else:
                 return first(v)
-        elif v == None and self.allow_null_default:
-            return None
         else:
             return self.default_value
         
     def __set__(self,obj,value):
         setter = getattr(obj,"set_" + self.__class__.getter)
         setter(self.attr,value)
-
+        
 class LinkAttribute(IdentiferAttribute):
     getter = "link_values"
     
@@ -201,7 +222,7 @@ class PopoloObject(six.with_metaclass(PopoloMeta,object)):
     def get_date(self, attr, default):
         d = self.data.get(attr)
         if d:
-            return ApproxDate.from_iso8601(d)
+            return approx_date_getter(d)
         return default
 
     def get_related_object_list(self, popolo_array):
