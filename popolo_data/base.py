@@ -82,14 +82,10 @@ class RelatedAttribute(Attribute):
         self.attr = attr
         self._default_value = default
         self.allow_null_default = null
-        self._id_attr = id_attr
         self._collection = collection
             
     @property
     def id_attr(self):
-        if self._id_attr:
-            return self._id_attr
-        else:
             return self.attr + "_id"
           
     @property  
