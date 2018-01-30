@@ -57,7 +57,6 @@ class TestSaving(TestCase):
         """
         full_attributes = {"id": "person1",
                              "email": "test@madeup.com",
-                             "gender": "male",
                              "honorific_prefix": "Dr",
                              "honorific_suffix": "MBe",
                              "image": "blahblah.jpg",
@@ -79,6 +78,7 @@ class TestSaving(TestCase):
                              }
 
         reduced_attributes = {"id": "4435435",
+                             "gender": "male",
                              "name": "Indiana Jones",
                              "other_names": [{"name":"Indiana Walton Jones"}],
                              }
@@ -120,6 +120,8 @@ class TestSaving(TestCase):
         assert other_person.id == "person1"
         assert new_person.property == "123 fake street"
         assert other_person.property == "123 fake street"
+        assert new_person.gender == "male"
+        assert other_person.gender == "male"
         assert "Indiana Walton Jones"  in [x["name"] for x in new_person.other_names]
         assert "Indiana Walton Jones" not in [x["name"] for x in original.other_names]
         

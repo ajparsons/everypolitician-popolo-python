@@ -142,6 +142,9 @@ class Person(PopoloObject):
         for n in other.other_names:
             if n["name"] not in our_names:
                 self.other_names.append(n)
+                
+        if not self.gender and other.gender:
+            self.gender = other.gender
 
 class Organization(PopoloObject):
     
