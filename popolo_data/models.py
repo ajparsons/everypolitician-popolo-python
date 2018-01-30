@@ -67,6 +67,13 @@ class Person(PopoloObject):
     facebook_all = LinkAttribute(attr="facebook",allow_multiple=True)
     fax_all = ContactAttribute(attr="fax",allow_multiple=True)
 
+    def get_identifier(self,scheme):
+        rel = [x for x in self.identifiers if x["scheme"] == scheme]
+        if len(rel) == 0:
+            return None
+        else:
+            return rel[0]["identifier"]
+
     @safe_property
     def twitter(self):
         username_or_url = self.contact_detail_value('twitter') or \
@@ -231,6 +238,12 @@ class Area(PopoloObject):
     other_names = Attribute(default=[])
     wikidata = IdentiferAttribute()
 
+    def get_identifier(self,scheme):
+        rel = [x for x in self.identifiers if x["scheme"] == scheme]
+        if len(rel) == 0:
+            return None
+        else:
+            return rel[0]["identifier"]
 
 class Post(PopoloObject):
     

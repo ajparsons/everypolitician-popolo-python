@@ -36,6 +36,33 @@ EXAMPLE_AREA = {
     "type": "constituency"
 }
 
+EXAMPLE_AREA_NO_IDENTIFERS = {
+    "id": "area/tartu_linn",
+    "identifiers": [
+
+    ],
+    "name": "Tartu linn",
+    "other_names": [
+        {
+            "lang": "fr",
+            "name": "Dixième circonscription législative d'Estonie",
+            "note": "multilingual"
+        },
+        {
+            "lang": "et",
+            "name": "Valimisringkond nr 10",
+            "note": "multilingual"
+        },
+        {
+            "lang": "en",
+            "name": "Electoral District 10 (Tartu)",
+            "note": "multilingual"
+        }
+    ],
+    "type": "constituency"
+}
+
+
 
 class TestAreas(TestCase):
 
@@ -68,6 +95,17 @@ class TestAreas(TestCase):
                 "scheme": "wikidata"
             }
         ]
+        
+    def test_area_get_idenfier(self):
+        popolo = Popolo({"areas": [EXAMPLE_AREA]})
+        area = popolo.areas[0]
+        assert area.get_identifier("wikidata") == "Q3032626"
+        popolo = Popolo({"areas": [EXAMPLE_AREA_NO_IDENTIFERS]})
+        area = popolo.areas[0]
+        assert area.get_identifier("wikidata") == None
+        
+        
+        
 
     def test_area_other_names(self):
         popolo = Popolo({"areas": [EXAMPLE_AREA]})

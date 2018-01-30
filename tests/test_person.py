@@ -534,6 +534,33 @@ class TestPersons(TestCase):
             person = popolo.persons.first
             assert person.name_at(date(1990, 6, 1)) == 'Robert'
 
+
+    def test_person_identifier(self):
+        with example_file(b'''
+{
+    "persons": [
+        {
+            "name": "Bob",
+              "identifiers": [
+                {
+                  "identifier": "161",
+                  "scheme": "everypolitician_legacy"
+                },
+                {
+                  "identifier": "Q4766480",
+                  "scheme": "wikidata"
+                }
+              ]
+        }
+    ]
+}
+''') as fname:
+            popolo = Popolo.from_filename(fname)
+            person = popolo.persons.first
+
+            assert person.get_identifier("wikidata") == "Q4766480"
+            assert person.get_identifier("parlparse") == None
+
     def test_person_name_at_historic_none_overlap(self):
         with example_file(b'''
 {
