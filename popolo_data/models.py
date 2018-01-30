@@ -195,6 +195,26 @@ class Membership(CurrentMixin, PopoloObject):
         return NotImplemented
 
     @safe_property
+    def effective_start_date(self):
+        """
+        If membership contains no special start information, 
+        return start of legislative period
+        """
+        if self.start_date == ApproxDate.PAST:
+            return self.legislative_period.start_date
+        return self.start_date
+    
+    @safe_property
+    def effective_end_date(self):
+        """
+        If membership contains no special start information, 
+        return start of legislative period
+        """
+        if self.end_date == ApproxDate.FUTURE:
+            return self.legislative_period.end_date
+        return self.end_date
+
+    @safe_property
     def key_for_hash(self):
         return json.dumps(self.data, sort_keys=True)
     

@@ -7,6 +7,7 @@ from mock import patch
 from .helpers import example_file
 
 from popolo_data.importer import Popolo
+from approx_dates.models import ApproxDate
 
 
 EXAMPLE_SINGLE_MEMBERSHIP = b'''
@@ -33,6 +34,7 @@ EXAMPLE_SINGLE_MEMBERSHIP = b'''
     ]
 }
 '''
+
 
 EXAMPLE_MEMBERSHIP_ALL_FIELDS = b'''
 {
@@ -90,6 +92,60 @@ EXAMPLE_MEMBERSHIP_ALL_FIELDS = b'''
 }
 '''
 
+EXAMPLE_MEMBERSHIP_ALL_FIELDS_NO_DATES = b'''
+{
+    "areas": [
+        {
+            "id": "dunny-on-the-wold",
+            "name": "Dunny-on-the-Wold"
+        }
+    ],
+    "events": [
+        {
+            "classification": "legislative period",
+            "id": "pitt",
+            "name": "Parliamentary Period",
+            "start_date": "1783-12-19",
+            "end_date": "1801-01-01"
+        }
+    ],
+    "persons": [
+        {
+            "id": "1234",
+            "name": "Edmund Blackadder"
+        }
+    ],
+    "posts": [
+        {
+            "id": "dunny-on-the-wold-seat",
+            "label": "Member of Parliament for Dunny-on-the-Wold"
+        }
+    ],
+    "organizations": [
+        {
+            "id": "commons",
+            "name": "House of Commons"
+        },
+        {
+            "id": "adder",
+            "name": "Adder Party",
+            "classification": "party"
+        }
+    ],
+    "memberships": [
+        {
+            "area_id": "dunny-on-the-wold",
+            "legislative_period_id": "pitt",
+            "on_behalf_of_id": "adder",
+            "organization_id": "commons",
+            "person_id": "1234",
+            "post_id": "dunny-on-the-wold-seat",
+            "role": "candidates"
+        }
+    ]
+}
+'''
+
 
 class TestMemberships(TestCase):
 
@@ -114,6 +170,22 @@ class TestMemberships(TestCase):
             assert m.person_id == 'SP-937-215'
             assert m.organization_id == 'starfleet'
 
+
+    def test_membership_returns_legislative_period_start_and_end(self):
+        #return sepcific start date and generic end date
+        with example_file(EXAMPLE_MEMBERSHIP_ALL_FIELDS) as fname:
+            popolo = Popolo.from_filename(fname)
+            m = popolo.memberships[0]
+            print (m.effective_start_date)
+            assert m.effective_start_date == ApproxDate.from_iso8601('1784-03-01')
+            assert m.effective_end_date == ApproxDate.from_iso8601('1784-05-23')
+            
+        #check it returns the start date when we are missing a more specific entry
+        with example_file(EXAMPLE_MEMBERSHIP_ALL_FIELDS_NO_DATES) as fname:
+            popolo = Popolo.from_filename(fname)
+            m = popolo.memberships[0]         
+            assert m.effective_start_date == ApproxDate.from_iso8601('1783-12-19')
+            assert m.effective_end_date == ApproxDate.from_iso8601('1801-01-01')
     def test_membership_has_role(self):
         with example_file(EXAMPLE_SINGLE_MEMBERSHIP) as fname:
             popolo = Popolo.from_filename(fname)
