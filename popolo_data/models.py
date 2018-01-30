@@ -5,7 +5,10 @@ Classes to access items inside Popolo Collections
 
 import json
 import re
+import hashlib
+import unidecode
 from six.moves.urllib_parse import urlsplit
+import six
 
 from approx_dates.models import ApproxDate
 
@@ -179,12 +182,32 @@ class Membership(CurrentMixin, PopoloObject):
         """
         returns a comparable id
         """
-        return hash(str([self.person_id,
+
+        m = hashlib.sha256()
+        
+        combo = [self.person_id,
+                 self.organization_id,
+                 self.area_id,
+                 self.post_id,
+                 self.legislative_period_id,
+                 self.on_behalf_of_id]
+        
+        combo = [unidecode.unidecode(x).encode("utf-8") for x in combo if x]
+        combo = b"".join(combo)
+        m.update(combo)
+        return m.hexdigest()
+
+
+    @safe_property
+    def old_id(self):
+
+        combo = str([self.person_id,
                          self.organization_id,
                          self.area_id,
                          self.post_id,
                          self.legislative_period_id,
-                         self.on_behalf_of_id]))
+                         self.on_behalf_of_id])
+        return hash(combo)
     
     def __repr__(self):
         enclosed = u"'{0}' at '{1}'".format(

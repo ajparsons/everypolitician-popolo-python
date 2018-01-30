@@ -18,5 +18,6 @@ setup(
         'approx_dates',
         'requests',
         'six >= 1.9.0',
+        'unidecode==0.4.18'
     ]
 )
