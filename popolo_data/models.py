@@ -163,6 +163,7 @@ class Organization(PopoloObject):
 class Membership(CurrentMixin, PopoloObject):
     
     role = Attribute()
+    source = Attribute()
     person_id = Attribute()
     organization_id = Attribute()
     area_id = Attribute()
